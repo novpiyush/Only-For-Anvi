@@ -32,6 +32,7 @@ body{height:100%;overflow:hidden;background:#fff;color:var(--ink);font-family:va
 #stage{--W:min(90vw,56dvh);position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 #stage>*{opacity:.01;will-change:transform,opacity}
 #stage.in>*{animation:riseO 1.3s cubic-bezier(.4,0,.25,1) .75s both,riseT 1.9s cubic-bezier(.16,.8,.28,1) .75s both}
+#stage.set>*{animation:none;opacity:1;transform:none;will-change:transform}
 @keyframes riseO{from{opacity:0}to{opacity:1}}
 @keyframes riseT{from{transform:translateY(7dvh)}to{transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(3dvh)}to{opacity:1;transform:none}}
@@ -50,7 +51,7 @@ body{height:100%;overflow:hidden;background:#fff;color:var(--ink);font-family:va
 .cv .face{border-radius:calc(var(--u)*.5) calc(var(--u)*2) calc(var(--u)*2) calc(var(--u)*.5)}
 .back{transform:rotateY(180deg);border-radius:calc(var(--u)*1.4) calc(var(--u)*.4) calc(var(--u)*.4) calc(var(--u)*1.4)}
 .cv .back{border-radius:calc(var(--u)*2) calc(var(--u)*.5) calc(var(--u)*.5) calc(var(--u)*2)}
-.sh{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;border-radius:inherit;will-change:opacity;background:linear-gradient(90deg,rgba(50,25,15,.6),rgba(50,25,15,.12))}
+.sh{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;border-radius:inherit;background:linear-gradient(90deg,rgba(50,25,15,.6),rgba(50,25,15,.12))}
 .back .sh{background:linear-gradient(270deg,rgba(50,25,15,.6),rgba(50,25,15,.12))}
 /* leather cover */
 .leather{background:var(--noise),linear-gradient(90deg,rgba(0,0,0,.55) 0,rgba(0,0,0,.2) 2.4%,rgba(0,0,0,.26) 6.4%,transparent 14%),radial-gradient(ellipse at 38% 26%,#86233b 0%,var(--wine) 50%,var(--wine2) 100%)}
@@ -352,6 +353,7 @@ body.rd #eyebtn.nr::before,body.rd #sndbtn.nr::before,body.rd #pgj.nr::before{an
 @keyframes bkpop{30%{transform:scale(.82)}65%{transform:scale(1.2)}}
 @keyframes bkring{0%{opacity:1;box-shadow:0 0 0 0 rgba(246,226,122,.75)}100%{opacity:0;box-shadow:0 0 0 17px rgba(246,226,122,0)}}
 @media (prefers-reduced-motion:reduce){#pgj.fl::after,#pgj.fl svg,#pgj.fl .pf{animation:none!important}}
+body.jmp #eyeui,body.jmp #pg,body.jmp #pgp,body.jmp #brkn{pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -497,7 +499,7 @@ body.rd #eyebtn.nr::before,body.rd #sndbtn.nr::before,body.rd #pgj.nr::before{an
 </div>
 <div id="pg"><span><b id="pgn" style="font-weight:600">Front cover</b></span></div>
 <div id="brkov" role="alertdialog" aria-live="assertive" aria-label="Eye break"><div class="bc"><div class="rg"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="84" fill="none" style="stroke:rgba(60,60,67,.14)" stroke-width="7"/><circle id="brkr" cx="100" cy="100" r="84" fill="none" style="stroke:var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="527.8" stroke-dashoffset="0" transform="rotate(-90 100 100)"/></svg><span id="brkt">1:00</span></div><b>Time for an eye break</b><small>Look at something far away.<br>Screen is locked until the timer ends.</small></div></div>
-<script>(function(){window.__brkLock=false;['pointerdown','pointerup','pointermove','pointercancel','mousedown','mouseup','click','dblclick','contextmenu','touchstart','touchmove','touchend','touchcancel','wheel','keydown','keyup','keypress','dragstart'].forEach(function(n){window.addEventListener(n,function(e){if(!window.__brkLock)return;if((n==='keydown'||n==='keyup')&&(e.ctrlKey||e.metaKey||e.key==='F5'||e.key==='F12'))return;e.stopImmediatePropagation();if(e.cancelable)e.preventDefault()},{capture:true,passive:false})})})();</script>
+<script>(function(){window.__brkLock=false;['pointerdown','pointerup','pointermove','pointercancel','mousedown','mouseup','click','dblclick','contextmenu','touchstart','touchmove','touchend','touchcancel','wheel','keydown','keyup','keypress','dragstart'].forEach(function(n){window.addEventListener(n,function(e){if(!window.__brkLock&&!window.__jmpLock)return;if((n==='keydown'||n==='keyup')&&(e.ctrlKey||e.metaKey||e.key==='F5'||e.key==='F12'))return;e.stopImmediatePropagation();if(e.cancelable)e.preventDefault()},{capture:true,passive:false})})})();</script>
 <script>
 (function(){
 var wrap=document.getElementById('wrap'),stage=document.getElementById('stage'),gate=document.getElementById('gate'),ht=document.getElementById('ht'),
@@ -673,22 +675,24 @@ setTimeout(function(){if(!fitted)fitPages(true)},1500);
 /* flip: pages swing on the spine, book itself never moves, scales or rotates */
 function sh(el,fr,D,dl){var e=el&&el.querySelector('.sh');if(e)e.animate(fr,{duration:D||DUR,delay:dl||0,easing:EASE})}
 function on(a,b,c){return[{opacity:a},{opacity:b,offset:.5},{opacity:c}]}
-/* stacking: every airborne leaf is re-sorted each frame by how far it stands off the page plane (like real paper),
-   so a leaf never pops in front of / behind its neighbour while many pages travel together */
-var zSet=[],zRaf=0;
-function zBase(){return N*2+20}
-function zStep(){zRaf=0;if(!zSet.length)return;var zb=zBase();
- zSet.forEach(function(l){var m=1;try{m=new DOMMatrix(getComputedStyle(l).transform).m11}catch(e){}
-  var s=Math.sqrt(Math.max(0,1-m*m));
-  l.style.zIndex=zb+Math.round(s*10000)*1000+(m>=0?N-l._k:l._k)});
- zRaf=requestAnimationFrame(zStep)}
+/* stacking: NO per-frame JavaScript. Every airborne leaf carries its own z-index animation on the same clock as its turn.
+   A leaf that has not yet reached the vertical (90deg) sits in the launch phase: the leaf that left earlier is in front.
+   After it passes the vertical it is in the landing phase: the leaf that left later is in front (it lands on top).
+   The switch happens exactly at 90deg, so pages keep their true order from start to finish, even when the phone is busy. */
+var zSeq=0,air=0;
+function zBase(){return N*2+50}
 function launch(l,k,fwd,D,delay,done){
- var P=pp(),a0=fwd?0:-180,a1=fwd?-180:0,kf=[];
+ var P=pp(),a0=fwd?0:-180,a1=fwd?-180:0,kf=[],zb=zBase(),n;
+ if(!air)zSeq=0;n=++zSeq;air++;
+ var zl=zb+100-n,zr=zb+200+n;
  for(var j=0;j<=12;j++){var t=j/12;kf.push({transform:'perspective('+P+'px) rotateY('+(a0+(a1-a0)*t).toFixed(2)+'deg)',offset:t})}
- l._k=k;l.style.transform=rest(k,fwd);l.style.zIndex=zBase()+(fwd?N-k:k);
- var an=l.animate(kf,{duration:D,delay:delay||0,easing:EASE,fill:'both'});l._an=an;
- if(zSet.indexOf(l)<0)zSet.push(l);if(!zRaf)zRaf=requestAnimationFrame(zStep);
- an.onfinish=function(){l._an=null;var x=zSet.indexOf(l);if(x>=0)zSet.splice(x,1);l.style.zIndex=zi(k,fwd);
+ l.style.transform=rest(k,fwd);l.style.zIndex=zl;
+ var tm={duration:D,delay:delay||0,easing:EASE,fill:'both'};
+ var an=l.animate(kf,tm),az=l.animate([{zIndex:zl,offset:0},{zIndex:zl,offset:.49999},{zIndex:zr,offset:.5},{zIndex:zr,offset:1}],tm);
+ /* both animations are pinned to the same start time, so the z-order switch can never run ahead of / behind the turn */
+ try{var t0=document.timeline.currentTime;if(t0!=null){an.startTime=t0;az.startTime=t0}}catch(e){}
+ l._an=an;l._az=az;
+ an.onfinish=function(){l._an=null;l._az=null;air=Math.max(0,air-1);l.style.zIndex=zi(k,fwd);try{az.cancel()}catch(e){}
   requestAnimationFrame(function(){requestAnimationFrame(function(){try{an.cancel()}catch(e){}})});if(done)done()};
  return an}
 function flip(dir){
@@ -703,36 +707,49 @@ function flip(dir){
  i+=dir;vis();if(window.__anviPg)window.__anviPg(i);
  requestAnimationFrame(function(){pose();setTimeout(function(){sndTurn(k===0,k===N-1)},40)});
 }
-/* jump: NO instant snap. The pages near the start and the pages near the target flip one after another in a
-   staggered cascade (each on its own path, in order); the pages in between are skipped, hidden underneath.
-   The first leaf lifts off the current page, the last leaf lands on the target page. */
-function goTo(t){
+/* jump: pages near the start and pages near the target flip one after another in a staggered cascade;
+   the pages in between are skipped (hidden underneath). Same turn as a normal swipe, just chained.
+   Everything heavy is prepared BEFORE the first page moves (pages shown + warmed up), sounds are spread over the
+   cascade instead of being created in one frame, and cleanup runs after the last page has landed. */
+function goTo(t,done){
  t=Math.max(0,Math.min(N,t));
  if(busy||leaves.some(function(l){return l._an}))return false;
- if(t===i)return true;
+ if(t===i){if(done)done();return true}
  var dir=t>i?1:-1,fwd=dir>0,d=Math.abs(t-i),CAP=8,A=d<=CAP?d:4,B=d<=CAP?0:CAP-A,STG=85,D=950,seq=[],mid=[],k,from=i;
  if(fwd){for(k=i;k<i+A;k++)seq.push(k);for(k=t-B;k<t;k++)seq.push(k);for(k=i+A;k<t-B;k++)mid.push(k)}
  else{for(k=i-1;k>i-1-A;k--)seq.push(k);for(k=t+B-1;k>=t;k--)seq.push(k);for(k=i-1-A;k>=t+B;k--)mid.push(k)}
- var S=seq.length,TT=D+(S-1)*STG,fdone=false,rem=S;
+ var S=seq.length,TT=D+(S-1)*STG,fdone=false,rem=S,warm=[];
+ busy=true;
  mid.forEach(function(k){leaves[k].style.display='none'});
  seq.forEach(function(k){leaves[k].style.display=''});
  for(k=Math.max(0,t-3);k<=Math.min(N-1,t+3);k++)if(mid.indexOf(k)<0)leaves[k].style.display='';
- function fin(){if(fdone)return;fdone=true;
+ function fin(){if(fdone)return;fdone=true;try{leaves.forEach(function(l){l.style.opacity='';[].forEach.call(l.children,function(c){if(c.style.opacity)c.style.opacity=''})})}catch(e){}
   mid.forEach(function(k){var l=leaves[k];l.style.transform=rest(k,fwd);l.style.zIndex=zi(k,fwd)});
-  wrap.style.transitionDuration='';wrap.style.transitionDelay='';busy=false;vis()}
- busy=true;wrap.classList.add('open');
- /* the book sliding to / from the last cover rides exactly together with the last-cover leaf */
- if(t===N&&fwd){wrap.style.transitionDuration=D+'ms';wrap.style.transitionDelay=((S-1)*STG)+'ms'}
- else if(from===N&&!fwd){wrap.style.transitionDuration=D+'ms';wrap.style.transitionDelay='0ms'}
- i=t;if(window.__anviPg)window.__anviPg(i);
- seq.forEach(function(k,r){var l=leaves[k],dl=r*STG;
-  launch(l,k,fwd,D,dl,function(){if(--rem===0)fin()});
-  sh(l.children[0],fwd?on(0,.6,.6):on(.6,.6,0),D,dl);
-  sh(l.children[1],fwd?on(.6,.6,0):on(0,.6,.6),D,dl)});
- setTimeout(fin,TT+500);
- /* one flip sound per page, scheduled on the audio clock with the same stagger as the pages */
- requestAnimationFrame(function(){pose();
-  seq.forEach(function(k,r){sndTurn(k===0,k===N-1,k===0?.8:(S>1?.5:1),r*STG/1000,D/DUR)})});
+  wrap.style.transitionDuration='';wrap.style.transitionDelay='';busy=false;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){if(!busy)vis()})});
+  if(done)done()}
+ /* warm-up: pages that are hidden under another page are not painted by the browser until they show, which is what made
+    pages look cut / hang at the start. For 3 frames every flying page is put (almost invisible, 1%) on top so it is
+    painted in advance; then everything goes back and the turn starts. */
+ try{seq.forEach(function(k){if(fwd?k===i:k===i-1)return;var l=leaves[k],fr=l.children[0];if(!fr||l.classList.contains('cv'))return;
+   warm.push([l,k,fr])})}catch(e){}
+ void wrap.offsetWidth;
+ function start(){
+  try{leaves.forEach(function(l){[].forEach.call(l.children,function(c){if(c.style.opacity)c.style.opacity=''})})}catch(e){}
+  wrap.classList.add('open');
+  /* the book sliding to / from the last cover rides exactly together with the last-cover leaf */
+  if(t===N&&fwd){wrap.style.transitionDuration=D+'ms';wrap.style.transitionDelay=((S-1)*STG)+'ms'}
+  else if(from===N&&!fwd){wrap.style.transitionDuration=D+'ms';wrap.style.transitionDelay='0ms'}
+  i=t;if(window.__anviPg)window.__anviPg(i);
+  seq.forEach(function(k,r){var l=leaves[k],dl=r*STG;
+   launch(l,k,fwd,D,dl,function(){if(--rem===0)fin()});
+   sh(l.children[0],fwd?on(0,.6,.6):on(.6,.6,0),D,dl);
+   sh(l.children[1],fwd?on(.6,.6,0):on(0,.6,.6),D,dl)});
+  setTimeout(fin,TT+900);
+  requestAnimationFrame(function(){pose()});
+  /* one flip sound per page, created just before that page moves (not all in one frame) */
+  seq.forEach(function(k,r){setTimeout(function(){sndTurn(k===0,k===N-1,k===0?.8:(S>1?.5:1),.03,D/DUR)},Math.max(0,r*STG-30))})}
+ requestAnimationFrame(function(){requestAnimationFrame(function(){requestAnimationFrame(start)})});
  return true}
 window.__anviGo=goTo;window.__anviN=function(){return N};window.__anviKick=function(ms){kick(ms)};
 /* repaint kick: forces full-frame redraws around fullscreen so the surface never stays black */
@@ -760,16 +777,20 @@ document.getElementById('enter').addEventListener('click',function(){
  try{var el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf){var p=rf.call(el);if(p&&p.then)p.then(fsDone,fsDone);else setTimeout(fsDone,400)}else fsDone()}catch(e){fsDone()}
  setTimeout(fsDone,900);
 });
+/* once the entrance animation is over, drop it: a fill-forwards opacity animation on the stage kept the whole book in an extra offscreen surface and made the cover blink */
+(function(){var sc=document.getElementById('scene');if(!sc)return;var done=false;function settle(){if(done)return;done=true;stage.classList.add('set')}
+ sc.addEventListener('animationend',function(e){if(e.animationName==='riseT')settle()});
+ var obs=setInterval(function(){if(stage.classList.contains('in')){clearInterval(obs);setTimeout(settle,3200)}},200)})();
 /* input */
 var sx=0,sy=0,t0=0;
 document.addEventListener('pointerdown',function(e){sx=e.clientX;sy=e.clientY;t0=Date.now()});
 document.addEventListener('pointerup',function(e){
- if(gate.className.indexOf('hide')<0)return;
+ if(gate.className.indexOf('hide')<0||window.__jmpLock)return;
  var dx=e.clientX-sx,dy=e.clientY-sy;
  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){flip(dx<0?1:-1)}
  else if(Math.abs(dx)<12&&Math.abs(dy)<12&&Date.now()-t0<500){flip(i>=N||(i>0&&e.clientX<innerWidth*.3)?-1:1)}
 });
-document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' ')flip(1);if(e.key==='ArrowLeft')flip(-1)});
+document.addEventListener('keydown',function(e){if(window.__jmpLock)return;if(e.key==='ArrowRight'||e.key===' ')flip(1);if(e.key==='ArrowLeft')flip(-1)});
 })();
 </script>
 <script>
@@ -886,13 +907,14 @@ var lastRz=0,gjB=0;
 function rz(){lastRz=Date.now();if(window.__anviKick)window.__anviKick(1200)}
 addEventListener('resize',rz);
 if(window.visualViewport){visualViewport.addEventListener('resize',rz);visualViewport.addEventListener('scroll',function(){if(jopen||document.activeElement===ji)window.scrollTo(0,0);rz()})}
+function jlock(on){window.__jmpLock=on;document.body.classList.toggle('jmp',on)}
 function goJ(t){
- if(gjB)return;gjB=1;
+ if(gjB)return;gjB=1;jlock(true);clearTimeout(goJ._f);goJ._f=setTimeout(function(){jlock(false)},9000);
  var kb=document.activeElement===ji,K=window.__anviKick,t0=Date.now();
  try{ji.blur()}catch(e){}
  closeJ(true);if(K)K(2500);
- function go(){jp.classList.add('nb');var n=0;gjB=0;(function tr(){var g=window.__anviGo;if(g&&g(t)===false&&n++<25)setTimeout(tr,100);else if(K)K(3000)})()}
- (function w(){var e=Date.now()-t0,q=Date.now()-lastRz;if(e<(kb?150:90)||(q<(kb?200:140)&&e<(kb?700:420)))setTimeout(w,20);else go()})()}
+ function go(){jp.classList.add('nb');var n=0;gjB=0;(function tr(){var g=window.__anviGo;if(!g){jlock(false);return}var r=g(t,function(){jlock(false);clearTimeout(goJ._f);if(K)K(900)});if(r===false){if(n++<25)setTimeout(tr,100);else jlock(false)}else if(K)K(3000)})()}
+ (function w(){var e=Date.now()-t0,q=Date.now()-lastRz;if(e<350||(q<(kb?200:140)&&e<(kb?700:420)))setTimeout(w,20);else go()})()}
 pj.addEventListener('pointerdown',function(){pj.classList.add('nr')});
 var flT=0;pj.addEventListener('click',function(){clearTimeout(flT);pj.classList.remove('fl');void pj.offsetWidth;pj.classList.add('fl');flT=setTimeout(function(){pj.classList.remove('fl')},900);jopen?closeJ():openJ()});
 js.addEventListener('input',function(){jshow(+js.value);jf();jcap()});
