@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content">
 <title>What Piyushii Considers Anvi</title>
 <meta name="description" content="What Piyushii Considers Anvi">
 <meta property="og:type" content="website">
@@ -301,6 +301,7 @@ body.rd #eyebtn.nr::before,body.rd #sndbtn.nr::before{animation:none!important}
 #pgi:focus{box-shadow:inset 0 0 0 1.5px var(--accent)}
 #pgm{display:flex;align-items:center;justify-content:center;width:96px;height:52px;border-radius:14px;font:600 28px var(--sf);font-variant-numeric:tabular-nums;color:#000;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 .5px rgba(60,60,67,.2),inset 0 1px 2px rgba(0,0,0,.08)}
 #pgsl{width:28px;text-align:center;font:500 24px var(--sf);color:rgba(60,60,67,.38)}
+#pgp.nb{-webkit-backdrop-filter:none;backdrop-filter:none}
 #pgs{--f:0;display:block;width:100%;margin:6px 0 10px;background:transparent;-webkit-appearance:none;appearance:none;touch-action:none;cursor:pointer}
 #pgp .pgc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
 #pgp .pgc button{display:flex;align-items:center;justify-content:center;width:100%;min-width:0;height:44px;margin:0;padding:0;border:0;border-radius:14px;text-align:center;white-space:nowrap;font:600 11.5px/1 var(--sf);letter-spacing:-.01em;color:#1d1d1f;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 .5px rgba(60,60,67,.2),inset 0 1px 2px rgba(0,0,0,.08);cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;transition:background .2s,transform .3s var(--spring)}
@@ -481,7 +482,7 @@ body.rd #eyebtn.nr::before,body.rd #sndbtn.nr::before,body.rd #pgj.nr::before{an
  <button id="eyebtn" type="button" aria-label="Eye care" aria-expanded="false" aria-haspopup="true"><svg viewBox="0 0 24 24"><g class="lid"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle class="pu" cx="12" cy="12" r="2.7"/></g></svg></button>
  <button id="sndbtn" type="button" aria-label="Sound" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z"/><g class="wv"><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18 6.8a7.5 7.5 0 0 1 0 10.4"/></g><path class="sl" d="M4 4l16 16"/></svg></button>
  <button id="pgj" type="button" aria-label="Go to page" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M12 6.6C10.4 5.3 8 4.8 3.8 5v13c4.2-.2 6.6.3 8.2 1.6 1.6-1.3 4-1.8 8.2-1.6V5c-4.2-.2-6.6.3-8.2 1.6zM12 6.6v13"/><path class="pf" d="M12 6.6C13.6 5.3 16 4.8 20.2 5v13c-4.2-.2-6.6.3-8.2 1.6z"/><path class="pf pf2" d="M12 6.6C13.6 5.3 16 4.8 20.2 5v13c-4.2-.2-6.6.3-8.2 1.6z"/></svg></button>
-<div id="pgp" role="dialog" aria-label="Go to page"><h3>Go to page</h3><div class="pgr"><input id="pgi" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" value="–" aria-label="Page number"><span id="pgsl">/</span><div id="pgm" aria-label="Total pages">1</div></div><div id="pgcap">Front cover</div><input id="pgs" type="range" min="0" max="1" value="0" step="1" aria-label="Page"><div class="pgc"><button type="button" data-g="c">Front cover</button><button type="button" data-g="m">Closing cover</button><button type="button" data-g="l">Last cover</button></div><button id="pgok" type="button">Go</button></div>
+<div id="pgp" role="dialog" aria-label="Go to page"><h3>Go to page</h3><div class="pgr"><input id="pgi" type="text" inputmode="numeric" enterkeyhint="done" pattern="[0-9]*" maxlength="3" autocomplete="off" value="–" aria-label="Page number"><span id="pgsl">/</span><div id="pgm" aria-label="Total pages">1</div></div><div id="pgcap">Front cover</div><input id="pgs" type="range" min="0" max="1" value="0" step="1" aria-label="Page"><div class="pgc"><button type="button" data-g="c">Front cover</button><button type="button" data-g="m">Closing cover</button><button type="button" data-g="l">Last cover</button></div><button id="pgok" type="button">Go</button></div>
 <div id="eyepn" role="group" aria-label="Eye care">
   <h3>Eye Care</h3>
   <div id="eylist"><i id="eyehl"></i>
@@ -733,7 +734,7 @@ function goTo(t){
  requestAnimationFrame(function(){pose();
   seq.forEach(function(k,r){sndTurn(k===0,k===N-1,k===0?.8:(S>1?.5:1),r*STG/1000,D/DUR)})});
  return true}
-window.__anviGo=goTo;window.__anviN=function(){return N};
+window.__anviGo=goTo;window.__anviN=function(){return N};window.__anviKick=function(ms){kick(ms)};
 /* repaint kick: forces full-frame redraws around fullscreen so the surface never stays black */
 var kEnd=0,kOn=false,kv=0;
 function kick(ms){var bg=document.getElementById('bgfill');kEnd=Math.max(kEnd,Date.now()+ms);if(kOn)return;kOn=true;
@@ -876,18 +877,34 @@ function jf(){js.style.setProperty('--f',JM>0?(js.value/JM).toFixed(4):0)}
 function jclamp(v){v=parseInt(v,10);if(isNaN(v))return null;return Math.max(0,Math.min(JM,v))}
 function jgo(v){return v<=0?0:v>=JM?getN():v}
 function jcur(){return Math.max(0,Math.min(JM,pg))}
-function jshow(v){ji.value=(v<=0||v>=JM-1)?'–':v}
+function jshow(v){ji.value=v;ji._ok=String(v)}
 function jval(){var v=jclamp(ji.value);return v===null?(+js.value):v}
 ji.addEventListener('focus',function(){setTimeout(function(){try{ji.select()}catch(e){}},0)});
-function openJ(){if(open)tog(false);JM=Math.max(2,getN());js.min=0;js.max=JM;ji.min=0;ji.max=JM;jm.textContent=JM-2;var c=jcur();jshow(c);js.value=c;jf();jcap();jopen=true;jp.classList.add('show');pj.classList.add('op');document.body.classList.add('eyeopen');pj.setAttribute('aria-expanded','true');sndOpen()}
-function closeJ(silent){if(!jopen)return;jopen=false;jp.classList.remove('show');pj.classList.remove('op');document.body.classList.toggle('eyeopen',open);pj.setAttribute('aria-expanded','false');if(!silent)sndClose()}
-function goJ(t){closeJ(true);var n=0;(function tr(){if(window.__anviGo&&window.__anviGo(t)===false&&n++<25)setTimeout(tr,180)})()}
+function openJ(){if(open)tog(false);JM=Math.max(2,getN());js.min=0;js.max=JM;ji.min=0;ji.max=JM;jm.textContent=jtot();var c=jcur();jshow(c);js.value=c;jf();jcap();jopen=true;jp.classList.remove('nb');ji.maxLength=String(jtot()).length+1;ji.setAttribute('max',jtot());jp.classList.add('show');pj.classList.add('op');document.body.classList.add('eyeopen');pj.setAttribute('aria-expanded','true');sndOpen()}
+function closeJ(silent){if(!jopen)return;jopen=false;jp.classList.remove('show');setTimeout(function(){if(!jopen)jp.classList.add('nb')},600);pj.classList.remove('op');document.body.classList.toggle('eyeopen',open);pj.setAttribute('aria-expanded','false');if(!silent)sndClose()}
+var lastRz=0,gjB=0;
+function rz(){lastRz=Date.now();if(window.__anviKick)window.__anviKick(1200)}
+addEventListener('resize',rz);
+if(window.visualViewport){visualViewport.addEventListener('resize',rz);visualViewport.addEventListener('scroll',function(){if(jopen||document.activeElement===ji)window.scrollTo(0,0);rz()})}
+function goJ(t){
+ if(gjB)return;gjB=1;
+ var kb=document.activeElement===ji,K=window.__anviKick,t0=Date.now();
+ try{ji.blur()}catch(e){}
+ closeJ(true);if(K)K(2500);
+ function go(){jp.classList.add('nb');var n=0;gjB=0;(function tr(){var g=window.__anviGo;if(g&&g(t)===false&&n++<25)setTimeout(tr,100);else if(K)K(3000)})()}
+ (function w(){var e=Date.now()-t0,q=Date.now()-lastRz;if(e<(kb?150:90)||(q<(kb?200:140)&&e<(kb?700:420)))setTimeout(w,20);else go()})()}
 pj.addEventListener('pointerdown',function(){pj.classList.add('nr')});
 var flT=0;pj.addEventListener('click',function(){clearTimeout(flT);pj.classList.remove('fl');void pj.offsetWidth;pj.classList.add('fl');flT=setTimeout(function(){pj.classList.remove('fl')},900);jopen?closeJ():openJ()});
 js.addEventListener('input',function(){jshow(+js.value);jf();jcap()});
-ji.addEventListener('input',function(){if(ji.value!=='–')ji.value=ji.value.replace(/\D/g,'');var v=jclamp(ji.value);if(v!==null){js.value=v;jf()}jcap()});
+function jtot(){return Math.max(1,JM)}
+function jsan(){var raw=ji.value;if(raw==='–')return;var T=jtot(),L=String(T).length,d=raw.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+ if(d.length>L||(d!==''&&parseInt(d,10)>T)){var ok=ji._ok||'';d=(ok&&d.length===ok.length+1)?ok:String(T)}
+ ji._ok=d;if(ji.value!==d)ji.value=d}
+ji.addEventListener('beforeinput',function(e){if(e.data&&/\D/.test(e.data))e.preventDefault()});
+ji.addEventListener('focus',function(){ji.value='';ji._ok='';rz();setTimeout(function(){window.scrollTo(0,0)},60);setTimeout(function(){window.scrollTo(0,0)},350)});
+ji.addEventListener('input',function(){jsan();var v=jclamp(ji.value);if(v!==null){js.value=v;jf()}jcap()});
 ji.addEventListener('blur',function(){var v=jval();js.value=v;jshow(v);jf();jcap()});
-ji.addEventListener('keydown',function(e){if(e.key==='Escape')closeJ();if(e.key==='Enter'){e.preventDefault();goJ(jgo(jval()))}});
+ji.addEventListener('keydown',function(e){if(e.key==='Escape')closeJ();if(e.key==='Enter'){e.preventDefault();ji.blur()}});
 document.getElementById('pgok').addEventListener('click',function(){sndTick('x',1);goJ(jgo(jval()))});
 jp.addEventListener('click',function(e){var c=e.target.closest('[data-g]');if(!c)return;sndTick('x',1);var g=c.getAttribute('data-g');goJ(g==='c'?0:g==='m'?getN()-1:getN())});
 window.addEventListener('pointerup',function(e){if(jopen&&!jp.contains(e.target)&&!pj.contains(e.target)){closeJ();if(!ui.contains(e.target))e.stopPropagation()}},true);
